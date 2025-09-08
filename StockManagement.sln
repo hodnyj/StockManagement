@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockApi", "StockApi\StockApi.csproj", "{AD878A89-C02D-4D7C-9D97-BA3E8E94B49D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StockApi.Tests", "StockApi.Tests\StockApi.Tests.csproj", "{28ECFF39-A3DE-4929-AD3F-089E91EB94E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StocklApi.IntegrationTests", "StocklApi.IntegrationTests\StocklApi.IntegrationTests.csproj", "{8ABB0F9D-CB18-4389-A2DC-CA7DCD861F7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{28ECFF39-A3DE-4929-AD3F-089E91EB94E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28ECFF39-A3DE-4929-AD3F-089E91EB94E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{28ECFF39-A3DE-4929-AD3F-089E91EB94E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ABB0F9D-CB18-4389-A2DC-CA7DCD861F7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ABB0F9D-CB18-4389-A2DC-CA7DCD861F7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ABB0F9D-CB18-4389-A2DC-CA7DCD861F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ABB0F9D-CB18-4389-A2DC-CA7DCD861F7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
