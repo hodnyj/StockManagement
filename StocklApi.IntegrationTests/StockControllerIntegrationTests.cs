@@ -1,13 +1,17 @@
 ﻿using System.Text.Json;
+using Xunit.Abstractions;
 
 namespace StockApi.Tests.IntegrationTests;
 
 public class StockControllerIntegrationTests : IClassFixture<CustomWebApplicationFactory>
 {
+    private readonly ITestOutputHelper _testOutputHelper;
     private readonly HttpClient _client;
 
-    public StockControllerIntegrationTests(CustomWebApplicationFactory factory)
+    public StockControllerIntegrationTests(CustomWebApplicationFactory factory, ITestOutputHelper testOutputHelper)
     {
+        _testOutputHelper = testOutputHelper;
+        factory.TestOutputHelper = _testOutputHelper;
         _client = factory.CreateClient();
     }
 
@@ -64,5 +68,14 @@ public class StockControllerIntegrationTests : IClassFixture<CustomWebApplicatio
         Assert.Equal("AAPL", root.GetProperty("ticker").GetString());
         Assert.Equal(1000, root.GetProperty("budget").GetDecimal());
         Assert.Equal(4, root.GetProperty("shares").GetDecimal());
+    }
+
+    [Fact]
+    public async Task GetTickerDetails_InvalidTicker_ShouldReturnNotFound()
+    {
+        // Arrange & Act
+        var response = await _client.GetAsync("/api/stock/INVALID");
+        // Assert
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, response.StatusCode);
     }
 }

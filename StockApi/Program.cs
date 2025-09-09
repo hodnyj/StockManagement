@@ -9,7 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.Configure<FileStockRepositoryOptions>(builder.Configuration.GetSection("Stocks:FileStocRepository"));
 
-builder.Services.AddScoped<IStockRepository, FileStockRepository>(); // TODO: Cached repository (Decorator)
+builder.Services.AddScoped<IStockRepository, FileStockRepository>();
+builder.Services.Decorate<IStockRepository, CachedStockRepository>();
 builder.Services.AddScoped<IStockService, StockService>();
 
 builder.Services
@@ -18,10 +19,21 @@ builder.Services
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDistributedMemoryCache(); // in production could be redis
+}
+else
+{
+    // for example, if using Redis in production
+    // builder.Services.AddRedis(); 
+}
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 var app = builder.Build();
 
@@ -41,7 +53,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
 
 // need for integration tests
 namespace StockApi

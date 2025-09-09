@@ -4,23 +4,18 @@ using StockApi.Exceptions;
 
 namespace StockApi.Middleware;
 
-public class GlobalExceptionHandler : IExceptionHandler
+public class GlobalExceptionHandler
+    (ILogger<GlobalExceptionHandler> logger, IHostEnvironment hostEnvironment)
+    : IExceptionHandler
 {
-    private readonly ILogger<GlobalExceptionHandler> _logger;
-
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
-    {
-        _logger = logger;
-    }
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-
-        _logger.LogError("Unhandled exception occurred: {exceptionMessage}", exception.Message);
+        logger.LogError(exception, "Unhandled exception occurred: {exceptionMessage}", exception.Message);
 
         (string Detail, string Title, int StatusCode) details = exception switch
         {
-            TickerNotFoundException =>
+            NotFoundException =>
             (
                 exception.Message,
                 exception.GetType().Name,
@@ -31,6 +26,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 exception.Message,
                 exception.GetType().Name,
                 httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError
+
             )
         };
 
@@ -41,10 +37,14 @@ public class GlobalExceptionHandler : IExceptionHandler
             Status = details.StatusCode,
             Instance = httpContext.Request.Path
         };
+        if (hostEnvironment.IsDevelopment())
+        {
+            problemDetails.Extensions.Add("stackTrace", exception.StackTrace);
+        }
 
         problemDetails.Extensions.Add("traceId", httpContext.TraceIdentifier);
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken: cancellationToken);
 
-        return true; // Exception handled
+        return true;
     }
 }

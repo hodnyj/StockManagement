@@ -1,24 +1,8 @@
 ﻿namespace StockApi.Exceptions;
 
-public class TickerNotFoundException : Exception
+public class TickerNotFoundException : NotFoundException
 {
-    public string Ticker { get; }
-
-    public TickerNotFoundException(string ticker)
-        : base($"Stock ticker '{ticker}' was not found.")
+    public TickerNotFoundException(string ticker) : base("Ticker", ticker)
     {
-        Ticker = ticker;
-    }
-
-    public TickerNotFoundException(string ticker, string message)
-        : base(message)
-    {
-        Ticker = ticker;
-    }
-
-    public TickerNotFoundException(string ticker, string message, Exception innerException)
-        : base(message, innerException)
-    {
-        Ticker = ticker;
     }
 }

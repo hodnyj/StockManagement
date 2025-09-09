@@ -23,11 +23,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StockApi.Tests.Helpers\StockApi.Tests.Helpers.csproj" />
     <ProjectReference Include="..\StockApi\StockApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="stocks-invalid.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

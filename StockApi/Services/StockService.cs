@@ -34,11 +34,6 @@ public class StockService : IStockService
 
     public async Task<BuyingOption> GetBuyingOptionAsync(string ticker, decimal budget, CancellationToken cancellation = default)
     {
-        if (string.IsNullOrWhiteSpace(ticker))
-        {
-            throw new ArgumentException("Ticker cannot be null or empty", nameof(ticker));
-        }
-
         if (budget <= 0)
         {
             throw new ArgumentException("Budget must be greater than zero", nameof(budget));
@@ -52,6 +47,9 @@ public class StockService : IStockService
         var shares = (int)Math.Floor(budget / sharePrice);
         var totalCost = shares * sharePrice;
         var remainingBudget = budget - totalCost;
+
+        // TODO: check negative shares and handle accordingly
+        // TODO: maybe ther should be date filtering, if thos stock contains history or not actual data, etc.
 
         var buyingOption = new BuyingOption
         {

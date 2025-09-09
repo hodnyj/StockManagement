@@ -1,29 +1,40 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using StockApi.Controllers;
+using StockApi.Exceptions;
+using StockApi.Interfaces;
 using StockApi.Models;
 using StockApi.Options;
 using StockApi.Repositories;
 using StockApi.Services;
+using StockApi.Tests.Helpers;
+using Xunit.Abstractions;
 
 namespace StockApi.Tests
 {
     public class StockControllerTests
     {
-        private StockController _controller;
-        public StockControllerTests()
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly StockController _controller;
+
+        public StockControllerTests(ITestOutputHelper testOutputHelper)
         {
-            _controller = new StockController(
-                new StockService(
-                    new FileStockRepository(
-                        NullLogger<FileStockRepository>.Instance,
-                        Microsoft.Extensions.Options.Options.Create(new FileStockRepositoryOptions
-                        {
-                            FilePath = "stocks.json"
-                        })
-                    ),
-                    NullLogger<StockService>.Instance),
-                NullLogger<StockController>.Instance);
+            _testOutputHelper = testOutputHelper;
+
+            var services = new ServiceCollection();
+            services.AddLogging(builder =>
+            {
+                builder.ClearProviders();
+                builder.AddProvider(new TestOutputLoggerProvider(_testOutputHelper));
+            });
+            services.Configure<FileStockRepositoryOptions>((options) => options.FilePath = "stocks.json");
+            services.AddScoped<IStockRepository, FileStockRepository>();
+            services.AddScoped<IStockService, StockService>();
+            services.AddScoped<StockController>();
+
+            var serviceProvider = services.BuildServiceProvider();
+            _controller = serviceProvider.GetRequiredService<StockController>();
         }
 
         [Fact]
@@ -33,7 +44,6 @@ namespace StockApi.Tests
             var controller = _controller;
 
             // Act
-
             var response = await controller.GetAllTickersAsync(); // changed ObjectResult -> see integration tests
             var result = response.Result as OkObjectResult;
 
@@ -89,5 +99,38 @@ namespace StockApi.Tests
             Assert.Equal(1000, buyingOptions.Budget);
             Assert.Equal(4, buyingOptions.Shares); // 1000 / 202.30 ≈ 4
         }
+
+        [Theory]
+        [InlineData("", typeof(ArgumentException))]
+        [InlineData(null, typeof(ArgumentException))]
+        [InlineData("INVALID", typeof(TickerNotFoundException))]
+        public async Task GetTickerDetails_InvalidTicker_ShouldThrowExpcetion(string invalidTicker, Type expectedExceptionType)
+        {
+            // Arrange
+            var controller = _controller;
+
+            // Act & Assert
+            await Assert.ThrowsAsync(expectedExceptionType, async () =>
+            {
+                await controller.GetTickerDetailsAsync(invalidTicker);
+            });
+        }
+
+        [Theory]
+        [InlineData("", typeof(ArgumentException))]
+        [InlineData(null, typeof(ArgumentException))]
+        [InlineData("INVALID", typeof(TickerNotFoundException))]
+        public async Task GetBuyingOption_InvalidTicker_ShouldThrowExpcetion(string invalidTicker, Type expectedExceptionType)
+        {
+            // Arrange
+            var controller = _controller;
+
+            // Act & Assert
+            await Assert.ThrowsAsync(expectedExceptionType, async () =>
+            {
+                await controller.GetBuyingOptionAsync(invalidTicker, 1000);
+            });
+        }
+
     }
 }

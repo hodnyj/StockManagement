@@ -1,10 +1,10 @@
 ﻿namespace StockApi.Repositories;
 
 using Microsoft.Extensions.Options;
-using StockApi.Exceptions;
 using StockApi.Interfaces;
 using StockApi.Models;
 using StockApi.Options;
+using System.Globalization;
 using System.Text.Json;
 
 /// <summary>
@@ -26,7 +26,7 @@ public class FileStockRepository : IStockRepository
     /// <summary>
     /// Gets all available stock tickers
     /// </summary>
-    public async Task<IEnumerable<string>> GetAllTickersAsync(CancellationToken cancellation = default)
+    public async Task<IEnumerable<string>> GetAllTickersAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Retrieving all stock tickers");
 
@@ -36,23 +36,11 @@ public class FileStockRepository : IStockRepository
     /// <summary>
     /// Gets stock by ticker symbol
     /// </summary>
-    public async Task<Stock> GetStockAsync(string ticker, CancellationToken cancellation = default)
+    public async Task<Stock> GetStockAsync(string ticker, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(ticker))
-        {
-            throw new ArgumentException("Ticker cannot be null or empty", nameof(ticker));
-        }
-
         _logger.LogInformation("Retrieving stock data for ticker: {Ticker}", ticker);
 
-        var stock = _stocks.Value.FirstOrDefault(s =>
-            string.Equals(s.Ticker, ticker, StringComparison.OrdinalIgnoreCase));
-
-        if (stock == null)
-        {
-            _logger.LogWarning("Stock ticker '{Ticker}' not found", ticker);
-            throw new TickerNotFoundException(ticker);
-        }
+        var stock = StockRepositoryHelper.GetStock(ticker, _stocks.Value); // Reuse helper method for consistency
 
         return await Task.FromResult(stock);
     }
@@ -60,7 +48,7 @@ public class FileStockRepository : IStockRepository
     /// <summary>
     /// Gets all stocks data
     /// </summary>
-    public async Task<IEnumerable<Stock>> GetAllStocksAsync(CancellationToken cancellation = default)
+    public async Task<IEnumerable<Stock>> GetAllStocksAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Retrieving all stocks data");
 
@@ -102,7 +90,7 @@ public class FileStockRepository : IStockRepository
             var stocks = stockFileDataList.Select(data => new Stock
             {
                 Ticker = data.Ticker,
-                Date = DateTime.Parse(data.Date),
+                Date = DateTime.Parse(data.Date, CultureInfo.InvariantCulture),
                 Open = data.Open,
                 Close = data.Close,
                 High = data.High,
