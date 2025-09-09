@@ -32,7 +32,7 @@ public class TestOutputLoggerProvider : ILoggerProvider
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             _output.WriteLine($"[{logLevel}] [{_categoryName}] {formatter(state, exception)}");
-            if (exception != null)
+            if (exception is not null)
             {
                 _output.WriteLine(exception.ToString());
             }

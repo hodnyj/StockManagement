@@ -2,9 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using StockApi.Controllers;
+using StockApi.Dtos;
 using StockApi.Exceptions;
 using StockApi.Interfaces;
-using StockApi.Models;
 using StockApi.Options;
 using StockApi.Repositories;
 using StockApi.Services;
@@ -71,7 +71,7 @@ namespace StockApi.Tests
 
             // Assert
             Assert.NotNull(result);
-            var stock = Assert.IsType<Stock>(result?.Value);
+            var stock = Assert.IsType<StockDto>(result?.Value);
             Assert.NotNull(stock);
             Assert.Equal("AAPL", stock.Ticker);
             Assert.Equal(198.15m, stock.Open);
@@ -93,7 +93,7 @@ namespace StockApi.Tests
 
             // Assert
             Assert.NotNull(result);
-            var buyingOptions = Assert.IsType<BuyingOption>(result?.Value);
+            var buyingOptions = Assert.IsType<BuyingOptionDto>(result?.Value);
             Assert.NotNull(buyingOptions);
             Assert.Equal("AAPL", buyingOptions.Ticker);
             Assert.Equal(1000, buyingOptions.Budget);

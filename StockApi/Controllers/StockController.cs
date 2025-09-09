@@ -1,4 +1,6 @@
+using Mapster;
 using Microsoft.AspNetCore.Mvc;
+using StockApi.Dtos;
 using StockApi.Interfaces;
 using StockApi.Models;
 
@@ -11,6 +13,7 @@ public class StockController : ControllerBase
     private readonly IStockService _stockService;
     private readonly ILogger<StockController> _logger;
 
+    // NOTE: For larger APIs, consider using the CQRS pattern (e.g., with MediatR) or implementing dedicated handlers/endpoints for better separation of concerns and scalability.
     public StockController(IStockService stockService, ILogger<StockController> logger)
     {
         _stockService = stockService ?? throw new ArgumentNullException(nameof(stockService));
@@ -28,22 +31,24 @@ public class StockController : ControllerBase
     }
 
     [HttpGet("{ticker}")]
-    [ProducesResponseType(typeof(Stock), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(StockDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Stock>> GetTickerDetailsAsync(string ticker, CancellationToken cancellation = default)
     {
         var stock = await _stockService.GetTickerDetailsAsync(ticker, cancellation);
-        return Ok(stock);
+        var result = stock.Adapt<StockDto>();
+        return Ok(result);
     }
 
     [HttpGet("{ticker}/buy")]
-    [ProducesResponseType(typeof(BuyingOption), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BuyingOptionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<BuyingOption>> GetBuyingOptionAsync(string ticker, [FromQuery] decimal budget, CancellationToken cancellation = default)
     {
         var buyingOption = await _stockService.GetBuyingOptionAsync(ticker, budget, cancellation);
-        return Ok(buyingOption);
+        var result = buyingOption.Adapt<BuyingOptionDto>();
+        return Ok(result);
     }
 }

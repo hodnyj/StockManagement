@@ -81,7 +81,7 @@ public class FileStockRepository : IStockRepository
                     PropertyNameCaseInsensitive = true
                 });
 
-            if (stockFileDataList == null)
+            if (stockFileDataList is null)
             {
                 _logger.LogWarning("No stock data found in file");
                 return new List<Stock>();
